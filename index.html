@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galaxy Jigsaw Puzzle</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #000000, #1a237e);
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin: 20px 0;
+    }
+    #puzzle {
+      display: grid;
+      grid-template-columns: repeat(3, 150px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 2px;
+      margin: 20px auto;
+      width: max-content;
+    }
+    .piece {
+      width: 150px;
+      height: 100px;
+      background-image: url("https://images.unsplash.com/photo-1435224654926-ecc9f7fa028c?auto=format&fit=crop&w=900&q=80");
+      background-size: 450px 300px;
+      cursor: grab;
+      border: 1px solid #fff;
+    }
+    #message {
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: bold;
+      color: yellow;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      background: #4caf50;
+      color: white;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #388e3c;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌌 Galaxy Jigsaw Puzzle</h1>
+  <p>Solve the puzzle to reveal your next clue!</p>
+  <div id="puzzle"></div>
+  <button onclick="checkWin()">Submit</button>
+  <div id="message"></div>
+
+  <script>
+    const puzzle = document.getElementById("puzzle");
+    const message = document.getElementById("message");
+
+    let pieces = [];
+    let rows = 3, cols = 3;
+
+    // Create puzzle pieces
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const piece = document.createElement("div");
+        piece.classList.add("piece");
+        piece.style.backgroundPosition = `-${col * 150}px -${row * 100}px`;
+        piece.setAttribute("data-pos", `${row}-${col}`);
+        pieces.push(piece);
+      }
+    }
+
+    // Shuffle pieces
+    pieces.sort(() => Math.random() - 0.5);
+    pieces.forEach(p => puzzle.appendChild(p));
+
+    let dragged;
+
+    // Drag functionality
+    document.querySelectorAll(".piece").forEach(piece => {
+      piece.draggable = true;
+
+      piece.addEventListener("dragstart", () => { dragged = piece; });
+      piece.addEventListener("dragover", e => e.preventDefault());
+      piece.addEventListener("drop", e => {
+        e.preventDefault();
+        if (dragged !== piece) {
+          let draggedPos = Array.from(puzzle.children).indexOf(dragged);
+          let droppedPos = Array.from(puzzle.children).indexOf(piece);
+
+          if (draggedPos > droppedPos) {
+            puzzle.insertBefore(dragged, piece);
+            puzzle.insertBefore(piece, puzzle.children[draggedPos]);
+          } else {
+            puzzle.insertBefore(piece, dragged);
+            puzzle.insertBefore(dragged, puzzle.children[droppedPos]);
+          }
+        }
+      });
+    });
+
+    // Check if solved
+    function checkWin() {
+      let correct = true;
+      document.querySelectorAll(".piece").forEach((piece, i) => {
+        let row = Math.floor(i / cols);
+        let col = i % cols;
+        if (piece.getAttribute("data-pos") !== `${row}-${col}`) {
+          correct = false;
+        }
+      });
+
+      if (correct) {
+        message.innerHTML = "🎉 Great! You solved the Galaxy Puzzle.<br>🔍 Clue: <i>“4.	“Sparks may fly, metal may bend, find your clue where the benches end.” ?”</i>";
+      } else {
+        message.innerText = "❌ Not correct yet. Keep trying!";
+      }
+    }
+  </script>
+</body>
+</html>
